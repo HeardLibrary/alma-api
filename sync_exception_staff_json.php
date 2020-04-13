@@ -19,12 +19,17 @@ ini_set("display_error", true);
 ini_set("auto_detect_line_ending", true); 
 
 include("api_users_json.inc"); 
-include("api_keys.inc"); 
 
-$input_fname = "staff_exceptions_2020.csv"; 
+//decide which key to use for this script 
+include("api_keys.inc"); 
+$server = "sandbox";
+$keytype = "user"; 
+$apikey = $apikeys['sandbox']['user'];
+echo "<p><strong> you are running the script for $server </strong></p>";
+
+$input_fname = "user_data/staff_exceptions_2020.csv"; 
 /* staff_exceptions.CSV file format is: CardID,Name,EPID,VUnetID,user group,library, */ 
 /* staff_exception_2020.CSV file format is: UserID,User Name,User Group */ 
-
 
 //open csv to read
 $infile = fopen($input_fname, 'rt'); 
@@ -42,7 +47,7 @@ while (($row = fgetcsv($infile)) !== FALSE) {
 
     $primary_id = $row[0]; 
 
-    $user_json = curl_get_user_details($primary_id, $apikey_user_production); 
+    $user_json = curl_get_user_details($primary_id, $apikey); 
     $user = json_decode($user_json); 
     //var_dump($user->user_group);  
 
@@ -55,7 +60,7 @@ while (($row = fgetcsv($infile)) !== FALSE) {
     $updated_user = udpate_user_json($user, "user_group", $new_ugroup);
     //var_dump($updated_user); 
 
-    $rr = curl_update_user($primary_id, $updated_user, $apikey_user_production); 
+    $rr = curl_update_user($primary_id, $updated_user, $apikey); 
     
     if ( isset(json_decode($rr)->errorsExist) )  echo " --- error <br/>"; 
     else echo "-- Done <br/>"; 

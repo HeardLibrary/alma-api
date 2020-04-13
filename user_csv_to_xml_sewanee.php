@@ -10,8 +10,8 @@ ini_set("display_error", true);
 ini_set("auto_detect_line_ending", true); 
 include("api_users_xml.inc"); 
 
-$input_fname = "sewanee2019.csv"; 
-$output_fname = "sewanee2019.xml"; 
+$input_fname = "user_data/sewanee2019.csv"; 
+$output_fname = "user_data/sewanee2019.xml"; 
 
 /* csv file format: Name, barcode, type, address, telephone, email */
 

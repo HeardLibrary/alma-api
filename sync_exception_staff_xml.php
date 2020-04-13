@@ -8,8 +8,15 @@ ini_set("auto_detect_line_ending", true);
 
 include("api_user_xml.inc"); 
 
+//decide which key to use for this script 
+include("api_keys.inc"); 
+$server = "sandbox";
+$keytype = "user"; 
+$apikey = $apikeys['sandbox']['user'];
+echo "<p><strong> you are running the script for $server </strong></p>";
 
-$input_fname = "staff_exceptions_2020.csv"; 
+
+$input_fname = "user_data/staff_exceptions_2020.csv"; 
 /* staff_exceptions.CSV file format is: CardID,Name,EPID,VUnetID,user group,library, */ 
 /* staff_exception_2020.CSV file format is: UserID,User Name,User Group */ 
 
@@ -29,7 +36,7 @@ while (($row = fgetcsv($infile)) !== FALSE) {
 
     $primary_id = $row[0]; 
 
-    $user_xml = curl_get_user_details($primary_id, $apikey_sandbox); 
+    $user_xml = curl_get_user_details($primary_id, $apikey); 
     // echo "<pre>",  htmlentities($user_xml), "</pre>";  
 
     $user = new DOMDocument("1.0", "utf-8");
@@ -45,7 +52,7 @@ while (($row = fgetcsv($infile)) !== FALSE) {
     $updated_user_xml = udpate_user_group($user, "user_group", $new_ugroup); 
     // echo "<pre>",  htmlentities($updated_user_xml), "</pre>";
 
-   $rr = curl_update_user($primary_id, $updated_user_xml, $apikey_sandbox); 
+   $rr = curl_update_user($primary_id, $updated_user_xml, $apikey); 
 
     echo "-- Done <br/>"; 
  

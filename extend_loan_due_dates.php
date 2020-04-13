@@ -8,7 +8,13 @@
 
 set_time_limit(0);
 include("api_loans.inc"); 
+
+//decide which key to use for this script 
 include("api_keys.inc"); 
+$server = "sandbox";
+$keytype = "user"; 
+$apikey = $apikeys['sandbox']['user'];
+echo "<p><strong> you are running the script for $server </strong></p>";
 
 //output outcome as it is generated
 ob_end_flush();
@@ -20,13 +26,13 @@ $eol = "<br/>";
 $users = array('user1', 'user2');
 foreach ($users as $uid) {
 	echo "<br/>", $uid, "<br/>"; 
-	$loansdata = curl_get_loans_from_user( $uid, $apikey_user_sandbox); 
+	$loansdata = curl_get_loans_from_user( $uid, $apikey); 
 	$loans = new simpleXMLElement($loansdata);
 	foreach ($loans->item_loan as $l){
 		$lid = $l->loan_id;
 		$lduedate = $l->due_date; 
 		echo "<br/>", $lid, "---", $lduedate;
-		$rr = curl_update_loans_due_dates($uid, $lid, $apikey_user_sandbox); 
+		$rr = curl_update_loans_due_dates($uid, $lid, $apikey); 
 
 		$errors = new SimpleXMLElement($rr);
 		$xmlerrors = $errors->errorsExist;
@@ -43,10 +49,10 @@ foreach ($users as $uid) {
 $rowCount = 0;
 
 //read analytic report 
-if (($handle = fopen("catch_loans.csv", "r")) !== FALSE) {
+if (($handle = fopen("user_data/catch_loans.csv", "r")) !== FALSE) {
 	echo "<p>Analytics report opened successfully. </p>$eol"; 
-	$fpsuccess = fopen('catch_done.log', 'a'); 
-	$fperror = fopen('catch_errored.log', 'a'); 
+	$fpsuccess = fopen('logs/catch_done.log', 'a'); 
+	$fperror = fopen('logs/catch_errored.log', 'a'); 
 
     while (($row = fgetcsv($handle, 1000, ",")) !== FALSE) {
  		
@@ -64,7 +70,7 @@ if (($handle = fopen("catch_loans.csv", "r")) !== FALSE) {
         echo "<p>$rowCount --- $pid --- $loanid --- $barcode --- to be updated ";   
         $log = " $rowCount | $pid | $loanid | $barcode| ";
 
-        $rr = curl_update_loans_due_dates($pid, $loanid, $apikey_prod); 
+        $rr = curl_update_loans_due_dates($pid, $loanid, $apikey); 
         $errors = new SimpleXMLElement($rr);
 		//print_r($errors); 
 		$xmlerrors = $errors->errorsExist;

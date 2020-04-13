@@ -7,8 +7,8 @@ ini_set("auto_detect_line_ending", true);
 
 include("api_users_xml.inc"); 
 
-$input_fname = "fisk2020spring.csv"; 
-$output_fname = "fisk2020spring.xml";
+$input_fname = "user_data/fisk2020spring.csv"; 
+$output_fname = "user_data/fisk2020spring.xml";
 
 /* CSV file format is: term, ID, first name, last name, collegelevel, email */ 
 /* CSV file format is: ID, first name, last name, middlename, email1, email2 */ 
