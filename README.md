@@ -7,7 +7,6 @@ Alma api keys are not stored in this repo for security, in order to run those ap
 
 ```
 <?php 
-
 $apikeys = array(
 	"sandbox" => array(
 		"user" => "sandbox user api key", 
@@ -22,7 +21,6 @@ $apikeys = array(
 		"acqusition" => "production acqusition api key"
 	)
 )
-
 ?>
 ```
 
@@ -35,7 +33,6 @@ In the API script, user should identify which key to use for their particular ap
 	$keytype = "user"; 
 	$apikey = $apikeys['sandbox']['user'];
 	echo "<p><strong> you are running the script for $server </strong></p>"; 
-
 ?>
 ```
 
