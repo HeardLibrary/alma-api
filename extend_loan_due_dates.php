@@ -13,8 +13,8 @@ include("api_loans.inc");
 include("api_keys.inc"); 
 $server = "sandbox";
 $keytype = "user"; 
-$apikey = $apikeys['sandbox']['user'];
-echo "<p><strong> you are running the script for $server </strong></p>";
+$apikey = $apikeys[$server][$keytype];
+echo "<p><strong> you are running the script on $server </strong></p>";
 
 //output outcome as it is generated
 ob_end_flush();

@@ -24,7 +24,7 @@ include("api_users_json.inc");
 include("api_keys.inc"); 
 $server = "sandbox";
 $keytype = "user"; 
-$apikey = $apikeys['sandbox']['user'];
+$apikey = $apikeys[$server][$keytype];
 echo "<p><strong> you are running the script for $server </strong></p>";
 
 $input_fname = "user_data/staff_exceptions_2020.csv"; 
