@@ -9,16 +9,16 @@ Alma api keys are not stored in this repo for security, in order to run those ap
 <?php 
 $apikeys = array(
 	"sandbox" => array(
-		"user" => "sandbox user api key", 
-		"bib" => "sandbox bib api key", 
-		"bibread" => "sandbox bib read only api key", 
-		"acqusition" => "sandbox acqusition api key" 
+		"user" => "sandbox_user_api_key", 
+		"bib" => "sandbox_bib_api_key", 
+		"bibread" => "sandbox_bib_read_only_api_key", 
+		"acqusition" => "sandbox_acqusition_api_key" 
 	), 
 	"production" => array(
-		"user" => "production user api key",
-		"bib" => "production bib api key", 
-		"bibread" => "productio bib read only api key", 
-		"acqusition" => "production acqusition api key"
+		"user" => "production_user_api_key",
+		"bib" => "production_bib_api_key", 
+		"bibread" => "production_bib_read_only_api_key", 
+		"acqusition" => "production_acqusition_api_key"
 	)
 )
 ?>
