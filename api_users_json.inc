@@ -6,13 +6,17 @@ Created by: Tao You at Vanderbilt University Library
 Last updated: 4/2020
 
 **** list of functions ****
+functions to create/update user_json or user element 
+- create_emails_json()
+- create_ids_json()
+- create_one_address()
+- create_addresses()
+- update_user_json()
 
-
-update_user_json()
-
-curl_get_user_details()
-curl_update_user()
-
+direct API calls:
+- curl_get_user_details()
+- curl_update_user()
+- curl_create_user()
 ************************************************************/
 function create_emails_json($emailsArray) {
 //$emailsArray = array( array( "email_value"=> , "email_desc"=> , "email_types" => array('value'=>'desc', ...) ))
@@ -69,7 +73,9 @@ function create_one_address($address) {
 //address = array('line1' => ,'line2'=>) 
     $j = array(); 
     $j['line1'] = $address['line1']; 
-    $j['line2'] = $address['line2']; 
+    if (isset($address['line2'])){
+         $j['line2'] = $address['line2']; 
+    }
     $j['address_type'] = array( array("value"=>"work", "desc"=>"Work") ); 
     return $j; 
 } 
@@ -167,6 +173,7 @@ function curl_update_user($user_id, $user_json, $apikey) {
 
     // For xml, change the content-type.
     curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt ($ch, CURLOPT_HTTPHEADER, Array("Accept: application/json"));
     curl_setopt ($ch, CURLOPT_HTTPHEADER, Array("Content-Type: application/json"));
 
     //curl_setopt($ch, CURLOPT_POST, 1);
