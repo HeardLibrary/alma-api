@@ -14,6 +14,7 @@ read postdoc.csv file, grab user primary ID;
         }
     }
 *************************************************************************/
+set_time_limit(0); //avoid php timeout 
 
 //output outcome as it is generated
 ob_end_flush();
@@ -27,7 +28,7 @@ include("api_users_json.inc");
 
 //decide which key to use for this script 
 include("api_keys.inc"); 
-$server = "sandbox";
+$server = "production";
 $keytype = "user"; 
 $apikey = $apikeys[$server][$keytype];
 echo "<p><strong> you are running the script on $server </strong></p>";
@@ -38,6 +39,9 @@ $input_fname = "user_data/active_VUMC_postdocs.csv";
 $infile = fopen($input_fname, 'rt'); 
 if (!$infile) { echo "cannot open input file"; exit; } 
 
+$flog = fopen('logs/postdoc.log', 'a'); 
+$log = "process postdoc records on $server on ". date('Y-m-d'). PHP_EOL;  
+
 //get the headers of the file 
 $headers = fgetcsv($infile);  //not processing csv header at this time
 
@@ -45,8 +49,8 @@ $cnt_total = 0; $cnt_updated = 0; $cnt_created = 0; $cnt_errored = 0;
 
 while (($row = fgetcsv($infile)) !== FALSE) {
     //testing control 
-    if ($cnt_total < 10) {$cnt_total++; continue;}  
-    if ($cnt_total > 15) break;
+    //if ($cnt_total < 0) {$cnt_total++; continue;}  
+    //if ($cnt_total > 4) break;
 
     $primary_id = $row[3]; 
 
@@ -60,6 +64,7 @@ while (($row = fgetcsv($infile)) !== FALSE) {
 
         $ugroup = $user->user_group; 
         echo $primary_id, " -- ", $ugroup->value;
+        $log .= $primary_id. " -- ". $ugroup->value;
 
         $user = update_postdoc_user($user); 
         
@@ -67,17 +72,20 @@ while (($row = fgetcsv($infile)) !== FALSE) {
 
         if ( isset(json_decode($r_update)->web_service_result->errorsExist) ) { 
             $cnt_errored ++; 
-            echo " --- error <br/>"; 
+            echo " --- error <br/>";
+            $log .= " --- error". PHP_EOL;  
         } 
         else {
             $cnt_updated ++; 
-            echo " -- Done <br/>"; 
+            echo " -- Done <br/>";
+            $log .= " -- Done ". PHP_EOL; 
         }
     }
     else { // user retrieve unsuccessful
 
         if (json_decode($r_get)->errorList->error[0]->errorCode == "401861") {
             echo $primary_id, " -- user not in the system, create one... ";
+            $log .= $primary_id. " -- user not in the system, create one... ";
         
             $user_new = create_postdoc_json_from_csv($row);
 
@@ -87,15 +95,18 @@ while (($row = fgetcsv($infile)) !== FALSE) {
             if ( isset(json_decode($r_create)->web_service_result->errorsExist) ) {
                 $cnt_errored ++; 
                 echo " --- error <br/>"; 
+                $log .= " --- error ".PHP_EOL; 
             } else {
                 $cnt_created ++; 
                 echo " -- Done <br/>"; 
+                $log .= " --- Done ".PHP_EOL; 
             }
 
         }
         else{
             $cnt_errored ++;  
             echo $primary_id, " -- something wrong with the user record<br/>"; 
+            $log .=  $primary_id. " -- something wrong with the user record"; 
         }    
     }
     
@@ -103,7 +114,10 @@ while (($row = fgetcsv($infile)) !== FALSE) {
 }          
 
 echo "<p>$cnt_updated records updated; $cnt_created records created; $cnt_errored records errored out; </p>"; 
-
+$log .= $cnt_updated ." records updated; ". $cnt_created . " records created; ". $cnt_errored ." records errored out;". PHP_EOL; 
+fwrite($flog, $log);
+fclose($flog); 
+fclose($infile); 
 
 function create_postdoc_json_from_csv($row){
 /**** update user_json using row data read from .csv file 
