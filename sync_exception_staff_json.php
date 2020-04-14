@@ -57,10 +57,10 @@ while (($row = fgetcsv($infile)) !== FALSE) {
     // if ($ugroup->nodeValue == "FACULTY") { echo "<br/>"; $i++; continue; }
 
     $new_ugroup = array("value" => "FACULTY", "desc" => "Faculty");
-    $updated_user = udpate_user_json($user, "user_group", $new_ugroup);
+    update_user_json($user, "user_group", $new_ugroup);
     //var_dump($updated_user); 
 
-    $rr = curl_update_user($primary_id, $updated_user, $apikey); 
+    $rr = curl_update_user($primary_id, $user, $apikey); 
     
     if ( isset(json_decode($rr)->errorsExist) )  echo " --- error <br/>"; 
     else echo "-- Done <br/>"; 
