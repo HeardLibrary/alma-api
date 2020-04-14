@@ -1,0 +1,140 @@
+{
+   "record_type":{
+      "value":"PUBLIC",
+      "desc":"Public"
+   },
+   "middle_name":"",
+   "pin_number":"",
+   "user_title":{
+      "value":"",
+      "desc":""
+   },
+   "gender":{
+      "value":"",
+      "desc":""
+   },
+   "campus_code":{
+      "value":null,
+      "desc":""
+   },
+   "web_site_url":"",
+   "preferred_language":{
+      "value":"en",
+      "desc":"English"
+   },
+   "account_type":{
+      "value":"EXTERNAL",
+      "desc":"External"
+   },
+   "password":"",
+   "force_password_change":"",
+   "status":{
+      "value":"ACTIVE",
+      "desc":"Active"
+   },
+   "requests":null,
+   "loans":null,
+   "fees":null,
+   "contact_info":{
+      "phone":[
+
+      ],
+      "address":[
+         {
+            "line1":"Research Fellow",
+            "line2":"Vanderbilt University Institute of Imaging Science",
+            "address_type":[
+               {
+                  "value":"work",
+                  "desc":"Work"
+               }
+            ]
+         }
+      ],
+      "email":[
+         {
+            "email_address":"fatemeh.adelnia@vumc.org",
+            "description":"VUMC email",
+            "preferred":true,
+            "segment_type":"External",
+            "email_type":[
+               {
+                  "value":"work",
+                  "desc":"Work"
+               }
+            ]
+         }
+      ]
+   },
+   "pref_first_name":"",
+   "pref_middle_name":"",
+   "pref_last_name":"",
+   "pref_name_suffix":"",
+   "is_researcher":false,
+   "researcher":null,
+   "link":null,
+   "user_identifier":[
+
+   ],
+   "user_role":[
+      {
+         "status":{
+            "value":"ACTIVE",
+            "desc":"Active"
+         },
+         "scope":{
+            "value":"01VAN_INST",
+            "desc":"Vanderbilt University"
+         },
+         "role_type":{
+            "value":"200",
+            "desc":"Patron"
+         },
+         "parameter":[
+
+         ]
+      }
+   ],
+   "user_block":[
+
+   ],
+   "user_statistic":[
+
+   ],
+   "proxy_for_user":[
+
+   ],
+   "status_date":"2020-04-14Z",
+   "external_id":"vumc_patron_load",
+   "primary_id":"adelnf1",
+   "first_name":"Fatemeh",
+   "last_name":"Adelnia",
+   "full_name":"Adelnia, Fatemeh",
+   "user_group":{
+      "value":"FACULTY",
+      "desc":"Faculty"
+   },
+   "user_statistics":[
+      {
+         "statistic_category":{
+            "value":"POSTDOC",
+            "desc":"Postdocs"
+         },
+         "segment_type":"Internal"
+      }
+   ],
+   "user_note":[
+      {
+         "note_type":{
+            "value":"OTHER",
+            "desc":"Other"
+         },
+         "note_text":"VUMC postdoc user loaded by LTDS",
+         "note_viewable":true,
+         "popup_note":false,
+         "create_by":"LTDS",
+         "segment_type":"Internal",
+         "create_date":"2020-04-14T11:00:00Z"
+      }
+   ]
+}
