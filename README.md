@@ -31,7 +31,7 @@ In the API script, user should identify which key to use for their particular ap
 	include("api_keys.inc"); 
 	$server = "sandbox";
 	$keytype = "user"; 
-	$apikey = $apikeys['sandbox']['user'];
+	$apikey = $apikeys[$server][$keytype];
 	echo "<p><strong> you are running the script for $server </strong></p>"; 
 ?>
 ```
