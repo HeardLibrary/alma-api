@@ -28,12 +28,12 @@ include("api_users_json.inc");
 
 //decide which key to use for this script 
 include("api_keys.inc"); 
-$server = "sandbox";
+$server = "production";
 $keytype = "user"; 
 
 $apikey = $apikeys[$server][$keytype];
 echo "<p><strong> you are running the script on $server </strong></p>";
-$logfile = 'logs/inactiveusers_'.date('Ymd'); 
+$logfile = 'logs/inactiveusers_'.date('Ymd').".log"; 
 $flog = fopen($logfile, 'a'); 
 $log = "expire inactive user records in $server on ". date('Y-m-d'). PHP_EOL;  
 
