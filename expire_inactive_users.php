@@ -33,7 +33,8 @@ $keytype = "user";
 
 $apikey = $apikeys[$server][$keytype];
 echo "<p><strong> you are running the script on $server </strong></p>";
-$flog = fopen('logs/inactiveusers.log', 'a'); 
+$logfile = 'logs/inactiveusers_'.date('Ymd'); 
+$flog = fopen($logfile, 'a'); 
 $log = "expire inactive user records in $server on ". date('Y-m-d'). PHP_EOL;  
 
 //read primary_id file
@@ -54,7 +55,7 @@ $cnt_total = 0; $cnt_updated = 0; $cnt_created = 0; $cnt_errored = 0;
 foreach ($inactive_users as $u ) {
     //testing control 
     //if ($cnt_total < 0) {$cnt_total++; continue;}  
-    if ($cnt_total > 2) break;
+    //if ($cnt_total > 2) break;
 
     $primary_id = $u->primary_id;  
 
@@ -89,7 +90,7 @@ foreach ($inactive_users as $u ) {
 
         $cnt_errored ++;  
         echo $primary_id, " -- something wrong with the user record<br/>"; 
-        $log .=  $primary_id. " -- something wrong with the user record"; 
+        $log .=  $primary_id. " -- something wrong with the user record". PHP_EOL; 
     }
 $cnt_total ++;         
 }
