@@ -17,6 +17,8 @@ $vu->get('ils_student_inactive_export.zip','vu_inactives.zip');
 exec('unzip vu_inactives.zip');
 exec('cat ils_student_inactive_export.xml|grep primary_id|sed "s/<primary_id>//g"|sed "s/<\/primary_id>//g"|sed -e "s/ //g" > inactives.txt');
 rename('vu_inactives.zip','user_data/Archive/vu_inactives_'.$datevar.'.zip');
+unlink('ils_student_inactive_export.xml');
+
 
 // VUMC FTP connector
 //$vumc=vumc();
