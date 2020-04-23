@@ -28,11 +28,15 @@ include("api_users_json.inc");
 
 //decide which key to use for this script 
 include("api_keys.inc"); 
-$server = "production";
+
+if (isset($_GET['server']))  $server = $_GET['server']; 
+else $server = "sandbox";
+
 $keytype = "user"; 
 
 $apikey = $apikeys[$server][$keytype];
 echo "<p><strong> you are running the script on $server </strong></p>";
+
 $logfile = 'logs/inactiveusers_'.date('Ymd').".log"; 
 $flog = fopen($logfile, 'a'); 
 $log = "expire inactive user records in $server on ". date('Y-m-d'). PHP_EOL;  
@@ -43,7 +47,12 @@ $log = "expire inactive user records in $server on ". date('Y-m-d'). PHP_EOL;
 //if (!$infile) { echo "cannot open input file"; exit; } 
 
 //or read xml file and getting user primary_id
-$input_fname = "user_data/ils_student_inactive_export.xml"; 
+if (isset($_GET['infile'])) {
+    $inpath = "user_data/Archive/";
+    $input_fname = $inpath.$_GET['infile'];
+}
+else $input_fname = "user_data/Archive/ils_student_inactive_export.xml"; 
+
 $xmlfile = file_get_contents($input_fname); 
 if (!$xmlfile) { echo "cannot open input file"; exit; } 
 
