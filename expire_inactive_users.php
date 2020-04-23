@@ -39,7 +39,8 @@ echo "<p><strong> you are running the script on $server </strong></p>";
 
 $logfile = 'logs/inactiveusers_'.date('Ymd').".log"; 
 $flog = fopen($logfile, 'a'); 
-$log = "expire inactive user records in $server on ". date('Y-m-d'). PHP_EOL;  
+$log = "expire inactive user records in $server on ". date('Y-m-d'). PHP_EOL; 
+fwrite($flog, $log); 
 
 //read primary_id file
 //$input_fname = "user_data/inactive_primary_ids"; 
@@ -48,13 +49,18 @@ $log = "expire inactive user records in $server on ". date('Y-m-d'). PHP_EOL;
 
 //or read xml file and getting user primary_id
 if (isset($_GET['infile'])) {
-    $inpath = "user_data/Archive/";
+    $inpath = "user_data/Archive/vu_inactives/";
     $input_fname = $inpath.$_GET['infile'];
 }
 else $input_fname = "user_data/Archive/ils_student_inactive_export.xml"; 
 
 $xmlfile = file_get_contents($input_fname); 
-if (!$xmlfile) { echo "cannot open input file"; exit; } 
+if (!$xmlfile) { 
+    echo "cannot open input file"; 
+    $log = "cannot open input file". PHP_EOL; 
+    fwrite($flog, $log);
+    exit; 
+} 
 
 // Convert xml string into an object 
 $inactive_users = simplexml_load_string($xmlfile); 
