@@ -30,12 +30,12 @@ function create_emails_json($emailsArray) {
         if ( $email['email_value'] ) {
             $j = array(); 
             $j['email_address'] = $email['email_value']; 
-            $j['description'] = $email['email_desc']; 
+            if (isset($email['email_desc'])) $j['description'] = $email['email_desc']; 
             
             if ($preferred_flag) { $j['preferred'] = $preferred_flag; $preferred_flag = false; }
             else $j['preferred'] = $preferred_flag; 
 
-            $j['segment_type'] = "External";
+            if (isset($email['segment_type'])) $j['segment_type'] = $email['segment_type'];
 
             $j['email_type'] = array(); 
             foreach($email['email_types'] as $v => $d) {

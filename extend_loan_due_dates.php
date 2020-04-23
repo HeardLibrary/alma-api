@@ -7,11 +7,11 @@
 ******************************************************************/
 
 set_time_limit(0);
-include("api_loans.inc"); 
+//include("api_loans.inc"); 
 
 //decide which key to use for this script 
 include("api_keys.inc"); 
-$server = "sandbox";
+$server = "production";
 $keytype = "user"; 
 $apikey = $apikeys[$server][$keytype];
 echo "<p><strong> you are running the script on $server </strong></p>";
@@ -21,56 +21,65 @@ ob_end_flush();
 ob_implicit_flush();
 $eol = "<br/>"; 
 
-/***  renew loans by user ID  ****/
+/*******************************************
+  renew loans by user IDs  
+********************************************/
+// //$users = array('user1', 'user2');
+// foreach ($users as $uid) {
+// 	echo "<br/>", $uid, "<br/>"; 
+// 	$loansdata = curl_get_loans_from_user( $uid, $apikey); 
+// 	$loans = new simpleXMLElement($loansdata);
+// 	foreach ($loans->item_loan as $l){
+// 		$lid = $l->loan_id;
+// 		$lduedate = $l->due_date; 
+		
+// 		if ( strpos($lduedate, "2020-05-04")  === false) {
 
-$users = array('user1', 'user2');
-foreach ($users as $uid) {
-	echo "<br/>", $uid, "<br/>"; 
-	$loansdata = curl_get_loans_from_user( $uid, $apikey); 
-	$loans = new simpleXMLElement($loansdata);
-	foreach ($loans->item_loan as $l){
-		$lid = $l->loan_id;
-		$lduedate = $l->due_date; 
-		echo "<br/>", $lid, "---", $lduedate;
-		$rr = curl_update_loans_due_dates($uid, $lid, $apikey); 
+// 			echo "<br/>", $lid, "---", $lduedate;
 
-		$errors = new SimpleXMLElement($rr);
-		$xmlerrors = $errors->errorsExist;
-		if  ($xmlerrors) {
-			$message = $errors->errorList->error->errorMessage[0];  
-			echo " --- error: $message </p> $eol";
-		} 
-		else echo " --- done </p> $eol"; 
-	}
-	echo "<br/>Done<br/>"; 
-} 
+// 			$rr = curl_update_loans_due_dates($uid, $lid, $apikey); 
 
-/*** renew loans by reading a list of user_id and loan_id from Analytics report ***/ 
+// 			$errors = new SimpleXMLElement($rr);
+// 			$xmlerrors = $errors->errorsExist;
+// 			if  ($xmlerrors) {
+// 				$message = $errors->errorList->error->errorMessage[0];  
+// 				echo " --- error: $message </p> $eol";
+// 			} 
+// 			else echo " --- done </p> $eol"; 
+// 		}	
+// 	}
+// 	echo "<br/>Done<br/>"; 
+// } 
+
+/*************************************************************************
+ renew loans by reading a list of user_id and loan_id from Analytics report 
+ *************************************************************************/ 
 $rowCount = 0;
 
 //read analytic report 
-if (($handle = fopen("user_data/catch_loans.csv", "r")) !== FALSE) {
+if (($handle = fopen("user_data/loans_catchup_to_sept.csv", "r")) !== FALSE) {
+/**	Primary Identifier,Item Loan Id,Due Date,Library Name,Process Status,Barcode,User Group,Expiry Date,Loan Date  **/
 	echo "<p>Analytics report opened successfully. </p>$eol"; 
-	$fpsuccess = fopen('logs/catch_done.log', 'a'); 
-	$fperror = fopen('logs/catch_errored.log', 'a'); 
+	$fpsuccess = fopen('logs/loans_to_sept_done.log', 'a'); 
+	$fperror = fopen('logs/loans_to_sept_errored.log', 'a'); 
 
     while (($row = fgetcsv($handle, 1000, ",")) !== FALSE) {
  		
  		//control which row to process   
-    	if ($rowCount < 1) { $rowCount ++; continue; }
-    	//if ($rowCount > 6000) {break; }
+    	//if ($rowCount < 22000) { $rowCount ++; continue; }
+    	//if ($rowCount > 22000) {break; }
         $fieldCount = count($row);
         //echo "<p> $fieldCount fields in line $rowCount: <br /></p>\n";
         //print_r($row); 
         $pid = $row[0]; 
-        $loanid = $row[1]; 
-        $barcode = $row[5];
+        $loanid = $row[2]; 
+        $barcode = $row[6];
 
         // renew loans 
         echo "<p>$rowCount --- $pid --- $loanid --- $barcode --- to be updated ";   
         $log = " $rowCount | $pid | $loanid | $barcode| ";
 
-        $rr = curl_update_loans_due_dates($pid, $loanid, $apikey); 
+        $rr = curl_update_loans_due_dates($pid, $loanid, $apikey, "2020-09-04"); 
         $errors = new SimpleXMLElement($rr);
 		//print_r($errors); 
 		$xmlerrors = $errors->errorsExist;
@@ -93,6 +102,7 @@ if (($handle = fopen("user_data/catch_loans.csv", "r")) !== FALSE) {
 	fclose($fpsuccess); 
 } 
 else echo "Failed to open analytics report! $eol"; 
+echo "done"; 
 
 
 //API functions 
@@ -121,8 +131,10 @@ function curl_get_loans_from_user($user_id, $apikey)
 	//print($response); 
 	return $response; 
 }
+echo "Done!";
 
-function curl_update_loans_due_dates($user_id, $loan_id, $apikey) {
+function curl_update_loans_due_dates($user_id, $loan_id, $apikey, $newdate) {
+//$newdate is a date string in the format of "YYYY-mm-dd"
 
 	$ch = curl_init();
 	//turnning off SSL verification on localhost   
@@ -141,9 +153,8 @@ function curl_update_loans_due_dates($user_id, $loan_id, $apikey) {
 
 	$postArgs = '<?xml version="1.0" encoding="UTF-8"?>
 					<item_loan>
-						<due_date>2020-07-04T23:59:00.000Z</due_date>
+						<due_date>'. $newdate. 'T23:59:00.000Z</due_date>
 					</item_loan>';
-
 
 	// For xml, change the content-type.
 	curl_setopt ($ch, CURLOPT_HTTPHEADER, Array("Content-Type: application/xml"));
