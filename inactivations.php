@@ -10,7 +10,7 @@ include('ftp_info.php');
 $vu=vu();
 //$vumc=vumc();
 
-$vu->chdir('inbound/prod/alma-inactivations');
+$vu->chdir('inbound/prd/alma-inactivations');
 $vu->get('ils_student_inactive_export.zip','vu_inactives.zip');
 
 ?>
