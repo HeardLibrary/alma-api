@@ -10,16 +10,14 @@ include('ftp_info.php');
 $vu=vu();
 
 $vu->chdir('inbound/prd/alma-inactivations');
-$vu->get('ils_student_inactive_export.zip','user_data/vu_inactives.zip');
-exec('unzip user_data/vu_inactives.zip');
-exec('cat user_data/ils_student*.xml|grep primary_id|sed "s/<primary_id>//g"|sed "s/<\/primary_id>//g"|sed -e "s/ //g" > user_data/inactives.txt');
-exec('cd ..');
+$vu->get('ils_student_inactive_export.zip','vu_inactives.zip');
+exec('unzip vu_inactives.zip');
+exec('cat ils_student_inactive_export.xml|grep primary_id|sed "s/<primary_id>//g"|sed "s/<\/primary_id>//g"|sed -e "s/ //g" > inactives.txt');
 
 // VUMC FTP connector
 $vumc=vumc();
 
 $vumc->chdir('files/inactivate');
-$vumc->get('en_library_inactivate.medc.xml.zip','user_data/vumc_inactives.zip');
-exec('cd user_data');
+$vumc->get('en_library_inactivate.medc.xml.zip','vumc_inactives.zip');
 exec('unzip vumc_inactives.zip');
 ?>
