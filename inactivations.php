@@ -11,6 +11,6 @@ $vu=vu();
 //$vumc=vumc();
 
 $vu->chdir('inbound/prd/alma-inactivations');
-$vu->get('ils_student_inactive_export.zip','vu_inactives.zip');
+$vu->get('ils_student_inactive_export.zip','user_data/vu_inactives.zip');
 
 ?>
