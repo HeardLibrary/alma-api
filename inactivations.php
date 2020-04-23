@@ -26,5 +26,5 @@ $vumc=vumc();
 $vumc->chdir('inactivate');
 $vumc->get('en_library_inactivate.medc.xml.zip','vumc_inactives.zip');
 exec('unzip vumc_inactives.zip');
-
+rename('vumc_inactives.zip','user_data/Archive/vumc_inactives_'.$datevar.'.zip');
 ?>
