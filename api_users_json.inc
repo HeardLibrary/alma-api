@@ -151,8 +151,8 @@ function curl_update_user($user_id, $user_json, $apikey) {
 
     $ch = curl_init();
     //turnning off SSL verification on localhost   
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    ////curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    ////curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
     //remove those on production  
 
     $baseurl = 'https://api-eu.hosted.exlibrisgroup.com/almaws/v1/users/{user_id}?';
@@ -193,8 +193,8 @@ function curl_create_user($user_json, $apikey) {
 
     $ch = curl_init();
     //turnning off SSL verification on localhost   
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    //curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    ///curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    ///curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
     //remove those on production  
 
     $baseurl = 'https://api-eu.hosted.exlibrisgroup.com/almaws/v1/users/?';
