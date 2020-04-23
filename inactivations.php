@@ -21,9 +21,10 @@ rename('vu_inactives.zip','user_data/Archive/vu_inactives_'.$datevar.'.zip');
 
 
 // VUMC FTP connector
-//$vumc=vumc();
+$vumc=vumc();
 
-//$vumc->chdir('files/inactivate');
-//$vumc->get('en_library_inactivate.medc.xml.zip','vumc_inactives.zip');
-//exec('unzip vumc_inactives.zip');
+$vumc->chdir('inactivate');
+$vumc->get('en_library_inactivate.medc.xml.zip','vumc_inactives.zip');
+exec('unzip vumc_inactives.zip');
+
 ?>
