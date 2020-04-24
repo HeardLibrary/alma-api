@@ -9,24 +9,27 @@ include('ftp_info.php');
 // create date variable to be used for archiving
 $datevar=date("Ymd");
 
-// VU FTP connector
-$vu=vu();
+// find day of week - run VU FTP once a week on Tuesday
+$dayofweek=date("D");
 
-$vu->chdir('inbound/prd/alma-inactivations');
-$vu->get('ils_student_inactive_export.zip','vu_inactives.zip');
-//exec('unzip vu_inactives.zip');
-//rename('vu_inactives.zip','user_data/Archive/vu_inactives_'.$datevar.'.zip');
-//shell_exec('/opt/remi/php74/root/usr/bin/php expire_inactive_users.php server=sandbox&infile=vu');
-//unlink('ils_student_inactive_export.xml');
+if ($dayofweek == "Tue") {
+  // VU FTP connector
+  $vu=vu();
+
+  //change directory on VUIT FTP server
+  $vu->chdir('inbound/prd/alma-inactivations');
+
+  //get zip file of inactives
+  $vu->get('ils_student_inactive_export.zip','vu_inactives.zip');
+}
 
 // VUMC FTP connector
 $vumc=vumc();
 
+//change directory on VUMC FTP server
 $vumc->chdir('inactivate');
+
+//get zip file of inactives
 $vumc->get('en_library_inactivate.medc.xml.zip','vumc_inactives.zip');
-//exec('unzip vumc_inactives.zip');
-//rename('vumc_inactives.zip','user_data/Archive/vumc_inactives_'.$datevar.'.zip');
-//shell_exec('/opt/remi/php74/root/usr/bin/php expire_inactive_users.php server=sandbox&infile=vumc');
-//unlink('en_library_inactivate.medc.xml');
 
 ?>
