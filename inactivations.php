@@ -12,7 +12,7 @@ $datevar=date("Ymd");
 // find day of week - run VU FTP once a week on Tuesday
 $dayofweek=date("D");
 
-if ($dayofweek == "Tue") {
+//if ($dayofweek == "Tue") {
   // VU FTP connector
   $vu=vu();
 
@@ -21,7 +21,7 @@ if ($dayofweek == "Tue") {
 
   //get zip file of inactives
   $vu->get('ils_student_inactive_export.zip','vu_inactives.zip');
-}
+//}
 
 // VUMC FTP connector
 $vumc=vumc();
