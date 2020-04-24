@@ -50,17 +50,17 @@ fwrite($flog, $log);
 //or read xml file and getting user primary_id
 if (isset($_GET['infile'])) {
     if ($_GET['infile'] == 'vu' ){
-        $inpath = "user_data/Archive/vu_inactives/";
+        $inpath = "user_data/vu_inactives/";
         $filename = "ils_student_inactive_export.xml";
-        $input_fname = $inpath.$filename;
+        $input_fname = $filename;
     }
     elseif ($_GET['infile'] == 'vumc' ){
-        $inpath = "user_data/Archive/vumc_inactives/";
+        $inpath = "user_data/vumc_inactives/";
         $filename = "en_library_inactivate.medc.xml";
-        $input_fname = $inpath.$filename;
+        $input_fname = $filename;
     }
 }
-else $input_fname = "user_data/ils_student_inactive_export.xml"; 
+else $input_fname = "ils_student_inactive_export.xml"; 
 
 $xmlfile = file_get_contents($input_fname); 
 if (!$xmlfile) { 
