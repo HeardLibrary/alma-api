@@ -32,6 +32,8 @@ include("api_keys.inc");
 if (isset($_GET['server']))  $server = $_GET['server']; 
 else $server = "sandbox";
 
+echo "Server: ".$server."\n";
+
 $keytype = "user"; 
 
 $apikey = $apikeys[$server][$keytype];
@@ -61,6 +63,8 @@ if (isset($_GET['infile'])) {
     }
 }
 else $input_fname = "ils_student_inactive_export.xml"; 
+
+echo "Input Filename: ". $input_fname."\n";
 
 $xmlfile = file_get_contents($input_fname); 
 if (!$xmlfile) { 
