@@ -10,6 +10,8 @@ LANG=en_US.UTF-8; export LANG
 
 datevar=$(date +"%Y%m%d")
 
+server=production
+
 cd /apps/alma/alma-api
 
 chmod 776 expire_inactive_users.php
@@ -22,7 +24,7 @@ if [ -s "vu_inactives.zip" ]; then
   unzip vu_inactives.zip
   chmod 776 ils_student_inactive_export.xml
   sleep 10
-  php expire_inactive_users.php sandbox vu
+  php expire_inactive_users.php $server vu
   sleep 10
   mv vu_inactives.zip user_data/Archive/vu_inactives_$datevar.zip
   sleep 10
@@ -34,7 +36,7 @@ if [ -s "vumc_inactives.zip" ]; then
   unzip vumc_inactives.zip
   chmod 776 en_library_inactivate.medc.xml
   sleep 10
-  php expire_inactive_users.php sandbox vumc
+  php expire_inactive_users.php $server vumc
   sleep 10
   mv vumc_inactives.zip user_data/Archive/vumc_inactives_$datevar.zip
   sleep 10
