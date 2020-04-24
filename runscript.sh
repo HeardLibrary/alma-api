@@ -21,10 +21,10 @@ sleep 10
 unzip vumc_inactives.zip
 
 sleep 10
-php expire_inactive_users.php server=sandbox infile=vu
+php expire_inactive_users.php sandbox vu
 
 sleep 10
-php expire_inactive_users.php server=sandbox infile=vumc
+php expire_inactive_users.php sandbox vumc
 
 sleep 10
 #mv vu_inactives.zip user_data/Archive/vu_inactives_$datevar.zip
