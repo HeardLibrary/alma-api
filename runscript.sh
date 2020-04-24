@@ -14,18 +14,23 @@ cd /apps/alma/alma-api
 
 php inactivations.php
 
+sleep 10
 unzip vu_inactives.zip
 
+sleep 10
 unzip vumc_inactives.zip
 
+sleep 10
 php expire_inactive_users.php server=sandbox&infile=vu
 
+sleep 10
 php expire_inactive_users.php server=sandbox&infile=vumc
 
-mv vu_inactives.zip user_data/Archive/vu_inactives_$datevar.zip
+sleep 10
+#mv vu_inactives.zip user_data/Archive/vu_inactives_$datevar.zip
 
-mv vumc_inactives.zip user_data/Archive/vumc_inactives_$datevar.zip
+#mv vumc_inactives.zip user_data/Archive/vumc_inactives_$datevar.zip
 
-rm ils_student_inactive_export.xml
+#rm ils_student_inactive_export.xml
 
-rm en_library_inactivate.medc.xml
+#rm en_library_inactivate.medc.xml
