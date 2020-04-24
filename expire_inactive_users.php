@@ -17,7 +17,7 @@
 set_time_limit(0); //avoid php timeout 
 
 //output outcome as it is generated
-ob_end_flush();
+//ob_end_flush();
 ob_implicit_flush();
 
 error_reporting(E_ALL | E_STRICT);
@@ -94,7 +94,7 @@ foreach ($inactive_users as $u ) {
         //var_dump($user);  
 
         $ugroup = $user->user_group; 
-        //echo $primary_id, " -- ", $ugroup->value;
+        echo $primary_id, " -- ", $ugroup->value;
         $log .= $primary_id. " -- ". $ugroup->value;
 
         $user = expire_inactive_user($user); 
@@ -104,25 +104,25 @@ foreach ($inactive_users as $u ) {
 
         if ( isset(json_decode($r_update)->web_service_result->errorsExist) ) { 
             $cnt_errored ++; 
-            //echo " --- error <br/>";
+            echo " --- error \n";
             $log .= " --- error". PHP_EOL;  
         } 
         else {
             $cnt_updated ++; 
-            //echo " -- Done <br/>";
+            echo " -- Done \n";
             $log .= " -- Done ". PHP_EOL; 
         }
     }
     else { // user retrieve unsuccessful
 
         $cnt_errored ++;  
-        //echo $primary_id, " -- something wrong with the user record<br/>"; 
+        echo $primary_id, " -- something wrong with the user record\n"; 
         $log .=  $primary_id. " -- something wrong with the user record". PHP_EOL; 
     }
 $cnt_total ++;         
 }
     
-//echo "<p>$cnt_updated records expired; $cnt_errored records errored out; </p>"; 
+echo "$cnt_updated records expired; $cnt_errored records errored out;\n"; 
 $log .= $cnt_updated ." records expired; ". $cnt_errored ." records errored out;". PHP_EOL; 
 fwrite($flog, $log);
 fclose($flog); 
