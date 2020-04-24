@@ -8,7 +8,7 @@ LD_LIBRARY_PATH=/opt/remi/php74/root/usr/lib64; export LD_LIBRARY
 PATH=/usr/local/rvm/gems/ruby-2.6.3/bin:/usr/local/rvm/gems/ruby-2.6.3@global/bin:/usr/local/rvm/rubies/ruby-2.6.3/bin:/usr/lib64/qt-3.3/bin:/opt/remi/php74/root/usr/bin:/opt/remi/php74/root/usr/sbin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/rvm/bin:/root/bin; export PATH
 LANG=en_US.UTF-8; export LANG
 
-datevar=date('Ymd')
+datevar=date +"%Y%m%d"
 
 cd /apps/alma/alma-api
 
