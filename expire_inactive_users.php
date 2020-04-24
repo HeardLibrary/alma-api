@@ -68,8 +68,8 @@ echo "Input Filename: ". $input_fname."\n";
 
 $xmlfile = file_get_contents($input_fname); 
 if (!$xmlfile) { 
-    echo "cannot open input file"; 
-    $log = "cannot open input file". PHP_EOL; 
+    echo "cannot open input file:", $input_fname."<br/>"; 
+    $log = "cannot open input file:".$input_fname. PHP_EOL; 
     fwrite($flog, $log);
     exit; 
 } 
