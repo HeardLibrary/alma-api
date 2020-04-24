@@ -17,26 +17,26 @@ chmod 776 inactivations.php
 
 php inactivations.php
 
-sleep 10
-unzip vu_inactives.zip
+if [ -s "vu_inactives.zip" ]; then
+  sleep 10
+  unzip vu_inactives.zip
+  chmod 776 ils_student_inactive_export.xml
+  sleep 10
+  php expire_inactive_users.php sandbox vu
+  sleep 10
+  mv vu_inactives.zip user_data/Archive/vu_inactives_$datevar.zip
+  sleep 10
+  rm ils_student_inactive_export.xml
+fi
 
-sleep 10
-unzip vumc_inactives.zip
-
-chmod 776 en_library_inactivate.medc.xml
-chmod 776 ils_student_inactive_export.xml
-
-sleep 10
-php expire_inactive_users.php sandbox vu
-
-sleep 10
-php expire_inactive_users.php sandbox vumc
-
-sleep 10
-#mv vu_inactives.zip user_data/Archive/vu_inactives_$datevar.zip
-
-#mv vumc_inactives.zip user_data/Archive/vumc_inactives_$datevar.zip
-
-#rm ils_student_inactive_export.xml
-
-#rm en_library_inactivate.medc.xml
+if [ -s "vumc_inactives.zip" ]; then
+  sleep 10
+  unzip vumc_inactives.zip
+  chmod 776 en_library_inactivate.medc.xml
+  sleep 10
+  php expire_inactive_users.php sandbox vumc
+  sleep 10
+  mv vumc_inactives.zip user_data/Archive/vumc_inactives_$datevar.zip
+  sleep 10
+  rm en_library_inactivate.medc.xml
+fi
