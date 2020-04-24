@@ -62,7 +62,7 @@ if (isset($_GET['infile'])) {
         $input_fname = $filename;
     }
 }
-else $input_fname = "ils_student_inactive_export.xml"; 
+//else $input_fname = "ils_student_inactive_export.xml"; 
 
 echo "Input Filename: ". $input_fname."\n";
 
