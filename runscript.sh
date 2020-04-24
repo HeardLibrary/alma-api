@@ -12,6 +12,9 @@ datevar=$(date +"%Y%m%d")
 
 cd /apps/alma/alma-api
 
+chmod 776 expire_inactive_users.php
+chmod 776 inactivations.php
+
 php inactivations.php
 
 sleep 10
@@ -19,6 +22,9 @@ unzip vu_inactives.zip
 
 sleep 10
 unzip vumc_inactives.zip
+
+chmod 776 en_library_inactivate.medc.xml
+chmod 776 ils_student_inactive_export.xml
 
 sleep 10
 php expire_inactive_users.php sandbox vu
