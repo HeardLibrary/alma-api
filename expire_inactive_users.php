@@ -29,8 +29,9 @@ include("api_users_json.inc");
 //decide which key to use for this script 
 include("api_keys.inc"); 
 
-if (isset($_GET['server']))  $server = $_GET['server']; 
-else $server = "sandbox";
+$server=$argv[1];
+//if (isset($_GET['server']))  $server = $_GET['server']; 
+//else $server = "sandbox";
 
 echo "Server: ".$server."\n";
 
@@ -49,15 +50,17 @@ fwrite($flog, $log);
 //$infile = fopen($input_fname, 'rt'); 
 //if (!$infile) { echo "cannot open input file"; exit; } 
 
+$infile=$argv[2];
+
 //or read xml file and getting user primary_id
-if (isset($_GET['infile'])) {
-    if ($_GET['infile'] == 'vu' ){
-        $inpath = "user_data/vu_inactives/";
+if (isset($infile)) {
+    if ($infile == 'vu' ){
+        //$inpath = "user_data/vu_inactives/";
         $filename = "ils_student_inactive_export.xml";
         $input_fname = $filename;
     }
-    elseif ($_GET['infile'] == 'vumc' ){
-        $inpath = "user_data/vumc_inactives/";
+    elseif ($infile == 'vumc' ){
+        //$inpath = "user_data/vumc_inactives/";
         $filename = "en_library_inactivate.medc.xml";
         $input_fname = $filename;
     }
