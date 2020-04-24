@@ -94,7 +94,7 @@ foreach ($inactive_users as $u ) {
         //var_dump($user);  
 
         $ugroup = $user->user_group; 
-        echo $primary_id, " -- ", $ugroup->value;
+        //echo $primary_id, " -- ", $ugroup->value;
         $log .= $primary_id. " -- ". $ugroup->value;
 
         $user = expire_inactive_user($user); 
@@ -104,19 +104,19 @@ foreach ($inactive_users as $u ) {
 
         if ( isset(json_decode($r_update)->web_service_result->errorsExist) ) { 
             $cnt_errored ++; 
-            echo " --- error \n";
+            //echo " --- error \n";
             $log .= " --- error". PHP_EOL;  
         } 
         else {
             $cnt_updated ++; 
-            echo " -- Done \n";
+            //echo " -- Done \n";
             $log .= " -- Done ". PHP_EOL; 
         }
     }
     else { // user retrieve unsuccessful
 
         $cnt_errored ++;  
-        echo $primary_id, " -- something wrong with the user record\n"; 
+        //echo $primary_id, " -- something wrong with the user record\n"; 
         $log .=  $primary_id. " -- something wrong with the user record". PHP_EOL; 
     }
 $cnt_total ++;         
