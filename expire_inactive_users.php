@@ -17,7 +17,7 @@
 set_time_limit(0); //avoid php timeout 
 
 //output outcome as it is generated
-//ob_end_flush();
+ob_end_flush();
 ob_implicit_flush();
 
 error_reporting(E_ALL | E_STRICT);
