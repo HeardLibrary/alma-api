@@ -14,6 +14,10 @@ cd /apps/alma/alma-api
 
 php inactivations.php
 
+unzip vu_inactives.zip
+
+unzip vumc_inactives.zip
+
 php expire_inactive_users.php server=sandbox&infile=vu
 
 php expire_inactive_users.php server=sandbox&infile=vumc
