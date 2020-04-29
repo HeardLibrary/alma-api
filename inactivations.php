@@ -21,6 +21,9 @@ if ($dayofweek == "Tue") {
 
   //get zip file of inactives
   $vu->get('ils_student_inactive_export.zip','vu_inactives.zip');
+
+  //rename remote file
+  $vu->rename('ils_student_inactive_export.zip','ils_student_inactive_export.zip.'.$datevar.'.old');
 }
 
 // VUMC FTP connector
@@ -32,4 +35,6 @@ $vumc->chdir('inactivate');
 //get zip file of inactives
 $vumc->get('en_library_inactivate.medc.xml.zip','vumc_inactives.zip');
 
+//rename remote zip file
+$vumc->rename('en_library_inactivate.medc.xml.zip','en_library_inactivate.medc.xml.zip.'.$datevar.'.old');
 ?>
