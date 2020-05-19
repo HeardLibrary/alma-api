@@ -22,7 +22,7 @@ include("api_users_json.inc");
 
 //decide which key to use for this script 
 include("api_keys.inc"); 
-$server = "sandbox";
+$server = "production";
 $keytype = "user"; 
 $apikey = $apikeys[$server][$keytype];
 echo "<p><strong> you are running the script for $server </strong></p>";
@@ -30,16 +30,26 @@ echo "<p><strong> you are running the script for $server </strong></p>";
 $input_fname = "user_data/staff_exceptions_2020.csv"; 
 /* staff_exceptions.CSV file format is: CardID,Name,EPID,VUnetID,user group,library, */ 
 /* staff_exception_2020.CSV file format is: UserID,User Name,User Group */ 
+$logfile = 'logs/exception_staff_'.date('Ymd').".log"; 
+$flog = fopen($logfile, 'a'); 
+$log = "update exception staff records in $server on ". date('Y-m-d'). PHP_EOL; 
+fwrite($flog, $log); 
 
 //open csv to read
 $infile = fopen($input_fname, 'rt'); 
-if (!$infile) { echo "cannot open input file"; exit; } 
+if (!$infile) { 
+    echo "cannot open input file"; 
+    $log = "cannot open input file:".$input_fname. PHP_EOL; 
+    fwrite($flog, $log);
+    fclose($flog); 
+    exit; 
+} 
 
 //get the headers of the file 
-$headers = fgetcsv($infile);  //not processing csv header at this time
+$headers = fgetcsv($infile);  // skip csv header
 
 
-$i = 0; 
+$i = 0; $j = 0; 
 while (($row = fgetcsv($infile)) !== FALSE) {
     //testing control 
     //if ($i < 3) {$i++; continue;}  
@@ -62,14 +72,21 @@ while (($row = fgetcsv($infile)) !== FALSE) {
 
     $rr = curl_update_user($primary_id, $user, $apikey); 
     
-    if ( isset(json_decode($rr)->errorsExist) )  echo " --- error <br/>"; 
+    if ( isset(json_decode($rr)->errorsExist) ) {
+        echo " --- error <br/>"; 
+        $j ++; 
+        $log = $primary_id. "-- error ". PHP_EOL;
+        fwrite($flog, $log);
+    }      
     else echo "-- Done <br/>"; 
  
     $i ++; 
 }    
-echo "$i user records updated"; 
-return; 
+echo "$i user records processed, $j user records errored out";
+$log = "$i user records processed, $j user records errored out". PHP_EOL; 
+fwrite($flog, $log); 
 
-
+fclose($infile); 
+fclose($flog);  
 
 ?>
