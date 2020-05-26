@@ -156,7 +156,7 @@ function expire_inactive_user( &$user) {
     $inactive_user_notes =
          array('note_type'=> array("value"=>"OTHER", "desc"=>"Other"), 
                'note_text' => "Inactive user expired by LTDS on " . date("Y-m-d"),  
-               'user_viewable'=> true, 
+               'user_viewable'=> false, 
                'popup_note' => false
          ); 
     array_push($notes, $inactive_user_notes); 
