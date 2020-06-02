@@ -42,7 +42,7 @@ echo "<p><strong> you are running the script on $server </strong></p>";
 
 $logfile = 'logs/inactiveusers_'.date('Ymd').".log"; 
 $flog = fopen($logfile, 'a'); 
-$log = "expire inactive user records in $server on ". date('Y-m-d'). PHP_EOL; 
+$log = "Expire inactive user records in $server on ". date('Y-m-d'). PHP_EOL; 
 fwrite($flog, $log); 
 
 //read primary_id file
@@ -55,14 +55,16 @@ $infile=$argv[2];
 //or read xml file and getting user primary_id
 if (isset($infile)) {
     if ($infile == 'vu' ){
-        //$inpath = "user_data/vu_inactives/";
+        //path is for local testing 
+        $inpath = "user_data/vu_inactives_".date('Ymd'). "/";
         $filename = "ils_student_inactive_export.xml";
-        $input_fname = $filename;
+        $input_fname = $inpath. $filename;
     }
     elseif ($infile == 'vumc' ){
-        //$inpath = "user_data/vumc_inactives/";
+        //path is for local testing only
+        $inpath = "user_data/vumc_inactives_".date('Ymd'). "/";
         $filename = "en_library_inactivate.medc.xml";
-        $input_fname = $filename;
+        $input_fname = $inpath. $filename;
     }
 }
 //else $input_fname = "ils_student_inactive_export.xml"; 
@@ -80,26 +82,37 @@ if (!$xmlfile) {
 // Convert xml string into an object 
 $inactive_users = simplexml_load_string($xmlfile); 
 
-$cnt_total = 0; $cnt_updated = 0; $cnt_created = 0; $cnt_errored = 0;  
+$cnt_total = 0; $cnt_skipped = 0; $cnt_updated = 0; $cnt_created = 0; $cnt_errored = 0;  
 
 foreach ($inactive_users as $u ) {
     //testing control 
-    //if ($cnt_total < 0) {$cnt_total++; continue;}  
-    //if ($cnt_total > 2) break;
+    if ($cnt_total < 15) {$cnt_total++; continue;}  
+    if ($cnt_total > 20 ) break;
 
     $primary_id = $u->primary_id;  
 
     $r_get = curl_get_user_details($primary_id, $apikey);
-
+   
     if ( !isset( json_decode($r_get)->errorsExist) ) { // user retrieved successfully 
        
         $user = json_decode($r_get); 
         //var_dump($user);  
 
-        $ugroup = $user->user_group; 
-        echo $primary_id, " -- ", $ugroup->value;
-        $log .= $primary_id. " -- ". $ugroup->value;
+        
+        $ugroup = $user->user_group;
+        $ustatus = $user->status; 
 
+        echo $primary_id, " -- ", $ugroup->value, " -- ", $ustatus->value;
+        $log .= $primary_id. " -- ". $ugroup->value. " -- ". $ustatus->value;
+
+        if ($ustatus->value == "INACTIVE") {
+            //already expired user record, no need to expire it again
+            $cnt_total ++; 
+            $cnt_skipped ++;
+            echo " --- skipped \n"; 
+            $log .= " --- skipped". PHP_EOL;  
+            continue; 
+        }
         $user = expire_inactive_user($user); 
         
         $r_update = curl_update_user($primary_id, $user, $apikey); 
@@ -117,7 +130,6 @@ foreach ($inactive_users as $u ) {
         }
     }
     else { // user retrieve unsuccessful
-
         $cnt_errored ++;  
         echo $primary_id, " -- something wrong with the user record\n"; 
         $log .=  $primary_id. " -- something wrong with the user record". PHP_EOL; 
@@ -125,10 +137,22 @@ foreach ($inactive_users as $u ) {
 $cnt_total ++;         
 }
     
-echo "$cnt_updated records expired; $cnt_errored records errored out;\n"; 
-$log .= $cnt_updated ." records expired; ". $cnt_errored ." records errored out;". PHP_EOL; 
+echo "$cnt_updated records expired; $cnt_skipped records skipped; $cnt_errored records errored out;\n"; 
+$log .= $cnt_updated . " records expired; "; 
+$log .= $cnt_skipped . " records skipped; "; 
+$log .= $cnt_errored . " records errored out;". PHP_EOL; 
 fwrite($flog, $log);
 fclose($flog); 
+
+// send log to system admin 
+$esubject = "Expire Inactive User Script Running Log";
+$eto = "tao.you@vanderbilt.edu";
+$eheaders = "From: tao.you@vanderbilt.edu\r\n";
+$eheaders  .= 'MIME-Version: 1.0' . "\r\n";
+$eheaders .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+mail($eto,$esubject,$log,$eheaders);
+//echo $log; 
+//echo "email sent to Tao"; 
 
 
 function expire_inactive_user( &$user) {
