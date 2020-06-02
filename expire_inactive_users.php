@@ -146,7 +146,7 @@ fclose($flog);
 
 // send log to system admin 
 $esubject = "Expire Inactive User Script Running Log";
-$eto = "tao.you@vanderbilt.edu";
+$eto = "libils@vanderbilt.edu,jamen.mcgranahan@vanderbilt.edu";
 $eheaders = "From: tao.you@vanderbilt.edu\r\n";
 $eheaders  .= 'MIME-Version: 1.0' . "\r\n";
 $eheaders .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
