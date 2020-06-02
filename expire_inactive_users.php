@@ -94,8 +94,8 @@ $cnt_total = 0; $cnt_skipped = 0; $cnt_updated = 0; $cnt_created = 0; $cnt_error
 
 foreach ($inactive_users as $u ) {
     //testing control 
-    if ($cnt_total < 15) {$cnt_total++; continue;}  
-    if ($cnt_total > 20 ) break;
+    //if ($cnt_total < 15) {$cnt_total++; continue;}  
+    //if ($cnt_total > 20 ) break;
 
     $primary_id = $u->primary_id;  
 
@@ -104,9 +104,7 @@ foreach ($inactive_users as $u ) {
     if ( !isset( json_decode($r_get)->errorsExist) ) { // user retrieved successfully 
        
         $user = json_decode($r_get); 
-        //var_dump($user);  
-
-        
+       
         $ugroup = $user->user_group;
         $ustatus = $user->status; 
 
@@ -157,10 +155,11 @@ $esubject = "Expire Inactive User Script Running Log";
 $eto = "libils@vanderbilt.edu,jamen.mcgranahan@vanderbilt.edu";
 $eheaders = "From: tao.you@vanderbilt.edu\r\n";
 $eheaders  .= 'MIME-Version: 1.0' . "\r\n";
-$eheaders .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+$eheaders .= 'Content-type: text/plain; charset=iso-8859-1' . "\r\n";
+
 mail($eto,$esubject,$log,$eheaders);
-//echo $log; 
-//echo "email sent to Tao"; 
+echo $log; 
+echo "email sent to Tao"; 
 
 
 function expire_inactive_user( &$user) {
