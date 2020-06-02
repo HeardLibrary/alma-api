@@ -30,7 +30,7 @@ echo "<p><strong> you are running the script for $server </strong></p>";
 $input_fname = "user_data/staff_exceptions_2020.csv"; 
 /* staff_exceptions.CSV file format is: CardID,Name,EPID,VUnetID,user group,library, */ 
 /* staff_exception_2020.CSV file format is: UserID,User Name,User Group */ 
-$logfile = 'logs/exception_staff_'.date('Ymd').".log"; 
+$logfile = "logs/exception_staff_".date('Ymd').".log"; 
 $flog = fopen($logfile, 'a'); 
 $log = "update exception staff records in $server on ". date('Y-m-d'). PHP_EOL; 
 fwrite($flog, $log); 
