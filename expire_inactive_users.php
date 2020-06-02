@@ -55,16 +55,24 @@ $infile=$argv[2];
 //or read xml file and getting user primary_id
 if (isset($infile)) {
     if ($infile == 'vu' ){
-        //path is for local testing 
-        $inpath = "user_data/vu_inactives_".date('Ymd'). "/";
-        $filename = "ils_student_inactive_export.xml";
-        $input_fname = $inpath. $filename;
+	if (isset($argv[3])) {
+	   //path is for local testing
+	   $inpath = "user_data/vu_inactives_".date('Ymd'). "/";
+           $filename = "ils_student_inactive_export.xml";
+	   $input_fname = $inpath. $filename;
+	} else {
+	   $input_fname = "ils_student_inactive_export.xml";
+	}
     }
     elseif ($infile == 'vumc' ){
-        //path is for local testing only
-        $inpath = "user_data/vumc_inactives_".date('Ymd'). "/";
-        $filename = "en_library_inactivate.medc.xml";
-        $input_fname = $inpath. $filename;
+       if (isset($argv[3])) {
+          //path is for local testing only
+          $inpath = "user_data/vumc_inactives_".date('Ymd'). "/";
+          $filename = "en_library_inactivate.medc.xml";
+          $input_fname = $inpath. $filename;
+       } else {
+	  $input_fname = "en_library_inactivate.medc.xml";
+       }
     }
 }
 //else $input_fname = "ils_student_inactive_export.xml"; 
