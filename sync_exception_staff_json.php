@@ -89,4 +89,12 @@ fwrite($flog, $log);
 fclose($infile); 
 fclose($flog);  
 
+// send log to system admin 
+$esubject = "Sync exception staff user records Log";
+$eto = "libils@vanderbilt.edu";
+$eheaders = "From: tao.you@vanderbilt.edu\r\n";
+$eheaders  .= 'MIME-Version: 1.0' . "\r\n";
+$eheaders .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+mail($eto,$esubject,$log,$eheaders);
+
 ?>
