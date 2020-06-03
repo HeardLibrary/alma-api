@@ -11,12 +11,13 @@
 *************************************************************************/
 
 //output outcome as it is generated
-ob_end_flush();
-ob_implicit_flush();
+//ob_end_flush();
+//ob_implicit_flush();
 
 error_reporting(E_ALL | E_STRICT);
 ini_set("display_error", true); 
 ini_set("auto_detect_line_ending", true); 
+$html_eol = "<br/>"; 
 
 include("api_users_json.inc"); 
 
@@ -25,30 +26,47 @@ include("api_keys.inc");
 $server = "production";
 $keytype = "user"; 
 $apikey = $apikeys[$server][$keytype];
-echo "<p><strong> you are running the script for $server </strong></p>";
+echo "<p><strong> you are running the script on $server </strong></p>";
 
 $input_fname = "user_data/staff_exceptions_2020.csv"; 
 /* staff_exceptions.CSV file format is: CardID,Name,EPID,VUnetID,user group,library, */ 
 /* staff_exception_2020.CSV file format is: UserID,User Name,User Group */ 
+
+/**** Prepare log file   ***/ 
 $logfile = "logs/exception_staff_".date('Ymd').".log"; 
 $flog = fopen($logfile, 'a'); 
-$log = "update exception staff records in $server on ". date('Y-m-d'). PHP_EOL; 
-fwrite($flog, $log); 
+$log = "update exception staff records in $server on ". date('Y-m-d'); 
+fwrite($flog, $log.PHP_EOL); 
 
+/*** Prepare email to system admin ***/
+$esubject = "Exception users update log -- ". $server. " -- ". date('Y-m-d'); 
+$eto = "libils@vanderbilt.edu,jamen.mcgranahan@vanderbilt.edu";
+//$eto = "tao.you@vanderbilt.edu"; 
+$eheaders = "From: tao.you@vanderbilt.edu\r\n";
+$eheaders  .= 'MIME-Version: 1.0' . "\r\n";
+$eheaders .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+$ebody = "<p><strong>". $log. "</strong></p>". $html_eol;
+//echo $ebody; 
+
+/*** Read CSV User file and process each user record ***/
 //open csv to read
 $infile = fopen($input_fname, 'rt'); 
 if (!$infile) { 
     echo "cannot open input file"; 
-    $log = "cannot open input file:".$input_fname. PHP_EOL; 
-    fwrite($flog, $log);
+    $log = "cannot open input file:".$input_fname;  
+    fwrite($flog, $log.PHP_EOL);
     fclose($flog); 
+
+    $ebody .= $log.$html_eol; 
+    mail($eto,$esubject,$ebody,$eheaders);
+    
     exit; 
 } 
 
-//get the headers of the file 
+//skip the headers of the file 
 $headers = fgetcsv($infile);  // skip csv header
 
-
+/*** update each user record  ***/
 $i = 0; $j = 0; 
 while (($row = fgetcsv($infile)) !== FALSE) {
     //testing control 
@@ -62,7 +80,7 @@ while (($row = fgetcsv($infile)) !== FALSE) {
     //var_dump($user->user_group);  
 
     $ugroup = $user->user_group; 
-    echo $primary_id, " -- ", $ugroup->value;
+    //echo $primary_id; 
 
     // if ($ugroup->nodeValue == "FACULTY") { echo "<br/>"; $i++; continue; }
 
@@ -73,28 +91,26 @@ while (($row = fgetcsv($infile)) !== FALSE) {
     $rr = curl_update_user($primary_id, $user, $apikey); 
     
     if ( isset(json_decode($rr)->errorsExist) ) {
-        echo " --- error <br/>"; 
         $j ++; 
-        $log = $primary_id. "-- error ". PHP_EOL;
-        fwrite($flog, $log);
+        $log = $primary_id. " --- Error "; 
     }      
-    else echo "-- Done <br/>"; 
- 
+    else $log = $primary_id. " --- Done"; 
+
+    //echo $log. $html_eol; 
+    fwrite($flog, $log.PHP_EOL);
+    $ebody .= $log.$html_eol; 
+
     $i ++; 
 }    
-echo "$i user records processed, $j user records errored out";
-$log = "$i user records processed, $j user records errored out". PHP_EOL; 
-fwrite($flog, $log); 
+$log = "$i user records processed, $j user records errored out";
+fwrite($flog, $log.PHP_EOL);
+
+/*** close files and send out email log ***/
+echo $log; 
+$ebody .= $log.$html_eol; 
+mail($eto,$esubject,$ebody,$eheaders);
 
 fclose($infile); 
 fclose($flog);  
-
-// send log to system admin 
-$esubject = "Sync exception staff user records Log";
-$eto = "libils@vanderbilt.edu";
-$eheaders = "From: tao.you@vanderbilt.edu\r\n";
-$eheaders  .= 'MIME-Version: 1.0' . "\r\n";
-$eheaders .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-mail($eto,$esubject,$log,$eheaders);
 
 ?>
