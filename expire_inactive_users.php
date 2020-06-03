@@ -16,74 +16,77 @@
 *************************************************************************/
 set_time_limit(0); //avoid php timeout 
 
-//output outcome as it is generated
-ob_end_flush();
-ob_implicit_flush();
+//output outcome as it is generated, only used for local testing
+//ob_end_flush();
+//ob_implicit_flush();
 
 error_reporting(E_ALL | E_STRICT);
 ini_set("display_error", true); 
 ini_set("auto_detect_line_ending", true); 
+$html_eol = "<br/>"; 
 
 include("api_users_json.inc"); 
 
 //decide which key to use for this script 
 include("api_keys.inc"); 
 
-$server=$argv[1];
-//if (isset($_GET['server']))  $server = $_GET['server']; 
+//command line running
+$server=$argv[1];  
+//running from a browser
+//if (isset($_GET['server']))  $server = $_GET['server']; //running from a browser
 //else $server = "sandbox";
-
-echo "Server: ".$server."\n";
+//echo "Server: ". $server. $html_eol;
 
 $keytype = "user"; 
-
 $apikey = $apikeys[$server][$keytype];
-echo "<p><strong> you are running the script on $server </strong></p>";
 
-$logfile = 'logs/inactiveusers_'.date('Ymd').".log"; 
+//Prepare log file
+$logfile = "logs/inactiveusers_".date('Ymd').".log"; 
 $flog = fopen($logfile, 'a'); 
-$log = "Expire inactive user records in $server on ". date('Y-m-d'). PHP_EOL; 
-fwrite($flog, $log); 
+$log = "Expire inactive user records in $server on ". date('Y-m-d'); 
+
+// Prepare email to system admin 
+$esubject = "Expire Inactive Users Log -- ". $server. " -- ". date('Y-m-d'); 
+$eto = "libils@vanderbilt.edu,jamen.mcgranahan@vanderbilt.edu";
+$eheaders = "From: tao.you@vanderbilt.edu\r\n";
+$eheaders  .= 'MIME-Version: 1.0' . "\r\n";
+$eheaders .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+$ebody = "<p><strong>". $log. "</strong></p>". $html_eol;
+//echo $ebody; 
+
+fwrite($flog, $log.PHP_EOL); 
 
 //read primary_id file
 //$input_fname = "user_data/inactive_primary_ids"; 
 //$infile = fopen($input_fname, 'rt'); 
 //if (!$infile) { echo "cannot open input file"; exit; } 
 
-$infile=$argv[2];
+//command line running
+$infile=$argv[2];  
+//running from a broswer
+//if (isset($_GET['infile']))  $infile = $_GET['infile'];  
 
 //or read xml file and getting user primary_id
 if (isset($infile)) {
     if ($infile == 'vu' ){
-	if (isset($argv[3])) {
-	   //path is for local testing
-	   $inpath = "user_data/vu_inactives_".date('Ymd'). "/";
-           $filename = "ils_student_inactive_export.xml";
-	   $input_fname = $inpath. $filename;
-	} else {
-	   $input_fname = "ils_student_inactive_export.xml";
+       $input_fname = "ils_student_inactive_export.xml";
 	}
-    }
     elseif ($infile == 'vumc' ){
-       if (isset($argv[3])) {
-          //path is for local testing only
-          $inpath = "user_data/vumc_inactives_".date('Ymd'). "/";
-          $filename = "en_library_inactivate.medc.xml";
-          $input_fname = $inpath. $filename;
-       } else {
-	  $input_fname = "en_library_inactivate.medc.xml";
-       }
+        $input_fname = "en_library_inactivate.medc.xml";
     }
 }
-//else $input_fname = "ils_student_inactive_export.xml"; 
 
-echo "Input Filename: ". $input_fname."\n";
+//echo "Input Filename: ". $input_fname. $html_eol; 
 
 $xmlfile = file_get_contents($input_fname); 
 if (!$xmlfile) { 
-    echo "cannot open input file:", $input_fname."<br/>"; 
-    $log = "cannot open input file:".$input_fname. PHP_EOL; 
-    fwrite($flog, $log);
+    $log = "cannot open input file:".$input_fname; 
+    fwrite($flog, $log.PHP_EOL);
+    
+    $ebody .= $log.$html_eol; 
+    mail($eto,$esubject,$ebody,$eheaders);
+    fclose($flog);
+
     exit; 
 } 
 
@@ -94,8 +97,8 @@ $cnt_total = 0; $cnt_skipped = 0; $cnt_updated = 0; $cnt_created = 0; $cnt_error
 
 foreach ($inactive_users as $u ) {
     //testing control 
-    //if ($cnt_total < 15) {$cnt_total++; continue;}  
-    //if ($cnt_total > 20 ) break;
+    //if ($cnt_total < 25) {$cnt_total++; continue;}  
+    //if ($cnt_total > 30 ) break;
 
     $primary_id = $u->primary_id;  
 
@@ -108,58 +111,56 @@ foreach ($inactive_users as $u ) {
         $ugroup = $user->user_group;
         $ustatus = $user->status; 
 
-        echo $primary_id, " -- ", $ugroup->value, " -- ", $ustatus->value;
-        $log .= $primary_id. " -- ". $ugroup->value. " -- ". $ustatus->value;
+        $log = $primary_id. " -- ". $ugroup->value. " -- ". $ustatus->value;
+        //echo $log; 
 
         if ($ustatus->value == "INACTIVE") {
             //already expired user record, no need to expire it again
             $cnt_total ++; 
             $cnt_skipped ++;
-            echo " --- skipped \n"; 
-            $log .= " --- skipped". PHP_EOL;  
+            $log .= " --- skipped";
+            //echo " --- skipped" .$html_eol;
+             
+            fwrite($flog, $log.PHP_EOL);
+            $ebody .= $log.$html_eol; 
+
             continue; 
         }
         $user = expire_inactive_user($user); 
         
         $r_update = curl_update_user($primary_id, $user, $apikey); 
-        //var_dump($r_update); 
-
+ 
         if ( isset(json_decode($r_update)->web_service_result->errorsExist) ) { 
             $cnt_errored ++; 
-            echo " --- error \n";
-            $log .= " --- error". PHP_EOL;  
+            $log .= " --- error";  
+            //echo " --- error". $html_eol; 
         } 
         else {
             $cnt_updated ++; 
-            echo " -- Done \n";
-            $log .= " -- Done ". PHP_EOL; 
+            $log .= " -- Done ";
+            //echo " --- Done" . $html_eol; 
         }
     }
     else { // user retrieve unsuccessful
         $cnt_errored ++;  
-        echo $primary_id, " -- something wrong with the user record\n"; 
-        $log .=  $primary_id. " -- something wrong with the user record". PHP_EOL; 
+        $log =  $primary_id. " -- something wrong with the user record"; 
+        //echo $log.$html_eol; 
     }
-$cnt_total ++;         
+
+    fwrite($flog, $log.PHP_EOL);
+    $ebody .= $log.$html_eol;  
+    $cnt_total ++;         
 }
     
-echo "$cnt_updated records expired; $cnt_skipped records skipped; $cnt_errored records errored out;\n"; 
-$log .= $cnt_updated . " records expired; "; 
+$log = $cnt_updated . " records expired; "; 
 $log .= $cnt_skipped . " records skipped; "; 
-$log .= $cnt_errored . " records errored out;". PHP_EOL; 
-fwrite($flog, $log);
-fclose($flog); 
+$log .= $cnt_errored . " records errored out;"; 
+fwrite($flog, $log.PHP_EOL);
+fclose($flog);
 
-// send log to system admin 
-$esubject = "Expire Inactive User Script Running Log";
-$eto = "libils@vanderbilt.edu,jamen.mcgranahan@vanderbilt.edu";
-$eheaders = "From: tao.you@vanderbilt.edu\r\n";
-$eheaders  .= 'MIME-Version: 1.0' . "\r\n";
-$eheaders .= 'Content-type: text/plain; charset=iso-8859-1' . "\r\n";
-
-mail($eto,$esubject,$log,$eheaders);
-echo $log; 
-echo "email sent to Tao"; 
+//echo $html_eol. $log. $html_eol; 
+$ebody = $html_eol. $log. $html_eol .$ebody; 
+mail($eto,$esubject,$ebody,$eheaders);
 
 
 function expire_inactive_user( &$user) {
