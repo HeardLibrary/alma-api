@@ -4,6 +4,8 @@
 
     read inactive_users.xml file, grab user primary ID;
     foreach (primaryID) {
+        if (primaryID in_array do_not_expire_users) 
+            continue; 
         retrieve full user_json using user API get
         update user_json {
             status: inactive
@@ -44,6 +46,19 @@ $apikey = $apikeys[$server][$keytype];
 $logfile = "logs/inactiveusers_".date('Ymd').".log"; 
 $flog = fopen($logfile, 'a'); 
 $log = "Expire inactive user records in $server on ". date('Y-m-d'); 
+
+//get do-not-expire-users array from file
+$do_not_expire_file = "user_data/do-not-expire-list.csv";
+$csvhead = 1; 
+$do_not_expire_users = array(); 
+$do_not_expire_fp = fopen( $do_not_expire_file, 'r');
+while (($line = fgetcsv($do_not_expire_fp)) !== FALSE) {
+  //$line is an array of the csv elements
+    if ($csvhead) {$csvhead = 0; continue; }
+    $do_not_expire_users[] = $line[0];
+}
+fclose($do_not_expire_fp); 
+//print_r($do_not_expire_users); 
 
 // Prepare email to system admin 
 $esubject = "Expire Inactive Users Log -- ". $server. " -- ". date('Y-m-d'); 
@@ -98,9 +113,23 @@ $cnt_total = 0; $cnt_skipped = 0; $cnt_updated = 0; $cnt_created = 0; $cnt_error
 foreach ($inactive_users as $u ) {
     //testing control 
     //if ($cnt_total < 25) {$cnt_total++; continue;}  
-    //if ($cnt_total > 30 ) break;
+    if ($cnt_total > 15 ) break;
 
     $primary_id = $u->primary_id;  
+
+    //if user is in do_not_expire_list, do nothing
+    if (in_array( $primary_id, $do_not_expire_users)) {
+        $cnt_total ++; 
+        $cnt_skipped ++;
+        $log = $primary_id . " --- do not expire, skipped";
+
+        //echo " --- do not expire, skipped" .$html_eol;
+             
+        fwrite($flog, $log.PHP_EOL);
+        $ebody .= $log.$html_eol; 
+
+        continue; 
+    }
 
     $r_get = curl_get_user_details($primary_id, $apikey);
    
