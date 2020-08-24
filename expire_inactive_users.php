@@ -113,7 +113,7 @@ $cnt_total = 0; $cnt_skipped = 0; $cnt_updated = 0; $cnt_created = 0; $cnt_error
 foreach ($inactive_users as $u ) {
     //testing control 
     //if ($cnt_total < 25) {$cnt_total++; continue;}  
-    if ($cnt_total > 15 ) break;
+    //if ($cnt_total > 15 ) break;
 
     $primary_id = $u->primary_id;  
 
@@ -136,9 +136,18 @@ foreach ($inactive_users as $u ) {
     if ( !isset( json_decode($r_get)->errorsExist) ) { // user retrieved successfully 
        
         $user = json_decode($r_get); 
-       
-        $ugroup = $user->user_group;
-        $ustatus = $user->status; 
+        
+        if ($user->user_group) { 
+          $ugroup = $user->user_group;
+        } else {
+          $ugroup = "STAFF-VUMC";
+        }
+
+        if ($user->status) {
+           $ustatus = $user->status;
+        } else {
+           $ustatus = "UNKNOWN";
+        } 
 
         $log = $primary_id. " -- ". $ugroup->value. " -- ". $ustatus->value;
         //echo $log; 
