@@ -139,14 +139,10 @@ foreach ($inactive_users as $u ) {
         
         if ($user->user_group) { 
           $ugroup = $user->user_group;
-        } else {
-          $ugroup = "STAFF-VUMC";
-        }
+        } 
 
         if ($user->status) {
            $ustatus = $user->status;
-        } else {
-           $ustatus = "UNKNOWN";
         } 
 
         $log = $primary_id. " -- ". $ugroup->value. " -- ". $ustatus->value;
