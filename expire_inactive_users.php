@@ -113,7 +113,7 @@ $cnt_total = 0; $cnt_skipped = 0; $cnt_updated = 0; $cnt_created = 0; $cnt_error
 foreach ($inactive_users as $u ) {
     //testing control 
     //if ($cnt_total < 25) {$cnt_total++; continue;}  
-    if ($cnt_total > 15 ) break;
+    //if ($cnt_total > 15 ) break;
 
     $primary_id = $u->primary_id;  
 
@@ -133,12 +133,17 @@ foreach ($inactive_users as $u ) {
 
     $r_get = curl_get_user_details($primary_id, $apikey);
    
-    if ( !isset( json_decode($r_get)->errorsExist) ) { // user retrieved successfully 
+    if ( !isset( json_decode($r_get, FALSE)->errorsExist) ) { // user retrieved successfully 
        
-        $user = json_decode($r_get); 
-       
-        $ugroup = $user->user_group;
-        $ustatus = $user->status; 
+        $user = json_decode($r_get, FALSE);  //return the json string as OBJECT 
+        
+        if ($user->user_group) { 
+          $ugroup = $user->user_group;
+        } 
+
+        if ($user->status) {
+           $ustatus = $user->status;
+        } 
 
         $log = $primary_id. " -- ". $ugroup->value. " -- ". $ustatus->value;
         //echo $log; 
@@ -155,11 +160,12 @@ foreach ($inactive_users as $u ) {
 
             continue; 
         }
+
         $user = expire_inactive_user($user); 
         
         $r_update = curl_update_user($primary_id, $user, $apikey); 
  
-        if ( isset(json_decode($r_update)->web_service_result->errorsExist) ) { 
+        if ( isset(json_decode($r_update, FALSE)->web_service_result->errorsExist) ) { 
             $cnt_errored ++; 
             $log .= " --- error";  
             //echo " --- error". $html_eol; 
