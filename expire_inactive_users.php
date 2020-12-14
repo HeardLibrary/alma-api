@@ -1,19 +1,58 @@
 <?php
 /*************************************************************************
- This script read inactive user xml load provided by VUIT, check again Alma to update user records status as "inactive", update user "expiry date" and "purge date" in Alma
+ This script read inactive user xml load provided by VUIT and VUMC, check again Alma to update user records, update user group for students, add "expiry date" and "purge date" in Alma
 
     read inactive_users.xml file, grab user primary ID;
     foreach (primaryID) {
         if (primaryID in_array do_not_expire_users) 
             continue; 
-        retrieve full user_json using user API get
-        update user_json {
-            status: inactive
-            expiry_date: today
-            purge_date: today + 2 years
-        } 
-        post user_json back to user record using user API PUT
+        retrieve full user_json using user API get method
+        //process user record based on user_group
+        
+        $flag_to_skip = 0; 
+        switch (user_group) 
+            case 'undergraduate':
+            case 'graduate student': 
+                expire_student_user {
+                    user_group: alumni
+                    status: active
+                    expiry_date: today + 1 year
+                    purge_date: today + 3 years
+                    notes: "Gradudated student changed to alumni by LTDS via VU inactive feed on today"
+                    notes: "Gradudated student changed to alumni, please update contact info and remove this note after contact updates"  - popup and internal note that can be deleted by circ staff  
+                }
+                break; 
+            case 'alumni': 
+                $flag_to_skip = 1
+                break;  
+            case 'faculty':
+            case 'staff': 
+            case 'staff-vumc': 
+            default:  
+                if isset(expiry_date) {
+                    $flag_to_skip = 1; 
+                } else {
+                    expire_inactive_fac_staff {
+                        expiry_date: today
+                        purge_date: today + 2 years
+                        status: active
+                        notes: "Inactive faculty/staff expired by LTDS via VU inactive feed on today"
+                    }
+                }    
+                break;     
+        }                
+        if ($flag_to_skip) { process log, cnt}
+        else {
+            post user_json back to user record using user API PUT
+            process log, cnt; 
+        }
     }
+
+** To run the script in command line: 
+   expire_inactive_users.php [server: production/sandbox] [infile: vu/vumc]
+** To run the script in browser: 
+   expire_inactive_users.php?server=[production/sandbox]&infile=[vu/vumc]
+** make sure the infile is located in the same folder as the script
 
 *************************************************************************/
 set_time_limit(0); //avoid php timeout 
@@ -121,7 +160,7 @@ foreach ($inactive_users as $u ) {
     if (in_array( $primary_id, $do_not_expire_users)) {
         $cnt_total ++; 
         $cnt_skipped ++;
-        $log = $primary_id . " --- do not expire, skipped";
+        $log = $primary_id . " -- do not expire, skipped";
 
         //echo " --- do not expire, skipped" .$html_eol;
              
@@ -135,8 +174,13 @@ foreach ($inactive_users as $u ) {
    
     if ( !isset( json_decode($r_get, FALSE)->errorsExist) ) { // user retrieved successfully 
        
-        $user = json_decode($r_get, FALSE);  //return the json string as OBJECT 
+        $user = json_decode($r_get, FALSE); //return the json string as an object 
         
+
+
+
+
+        // process user records based on user_group value
         if ($user->user_group) { 
           $ugroup = $user->user_group;
         } 
@@ -148,33 +192,51 @@ foreach ($inactive_users as $u ) {
         $log = $primary_id. " -- ". $ugroup->value. " -- ". $ustatus->value;
         //echo $log; 
 
-        if ($ustatus->value == "INACTIVE") {
-            //already expired user record, no need to expire it again
+        $flag_to_skip = 0; 
+        switch ($ugroup->value) {
+            case "ALUMNI":   //already processed, skip 
+                $flag_to_skip = 1; 
+                break; 
+            case "UNDERGRAD": 
+            case "GRADUATE": 
+                //turn to alumni, set up expiry date 
+                $user = expire_student_user($user); 
+                break; 
+            case "FACULTY": 
+            case "STAFF": 
+            case "STAFF-VUMC": 
+            default: 
+                if ( isset($user->expiry_date) ) {
+                    $flag_to_skip = 1;  
+                }
+                $user = expire_inactive_fac_staff($user); 
+                break; 
+        }        
+ 
+        if ( $flag_to_skip ) { //already expired user record, no need to expire it again
             $cnt_total ++; 
             $cnt_skipped ++;
-            $log .= " --- skipped";
-            //echo " --- skipped" .$html_eol;
+            $log .= " -- skipped";
+            // echo " -- skipped" .$html_eol;
              
             fwrite($flog, $log.PHP_EOL);
             $ebody .= $log.$html_eol; 
-
-            continue; 
         }
-
-        $user = expire_inactive_user($user); 
-        
-        $r_update = curl_update_user($primary_id, $user, $apikey); 
+        else {     
+            // update user record using API PUT 
+            $r_update = curl_update_user($primary_id, $user, $apikey); 
  
-        if ( isset(json_decode($r_update, FALSE)->web_service_result->errorsExist) ) { 
-            $cnt_errored ++; 
-            $log .= " --- error";  
-            //echo " --- error". $html_eol; 
-        } 
-        else {
-            $cnt_updated ++; 
-            $log .= " -- Done ";
-            //echo " --- Done" . $html_eol; 
-        }
+            if ( isset(json_decode($r_update, FALSE)->web_service_result->errorsExist) ) { 
+                $cnt_errored ++; 
+                $log .= " -- error";  
+                //echo " -- error". $html_eol; 
+            }
+            else {
+                $cnt_updated ++; 
+                $log .= " -- Done ";
+                //echo " -- Done" . $html_eol; 
+            }
+        }   
     }
     else { // user retrieve unsuccessful
         $cnt_errored ++;  
@@ -198,12 +260,12 @@ $ebody = $html_eol. $log. $html_eol .$ebody;
 mail($eto,$esubject,$ebody,$eheaders);
 
 
-function expire_inactive_user( &$user) {
-/****expire inactive user records **************
+function expire_inactive_fac_staff( &$user) {
+/****expire inactive faculty/staff records **************
 * status_date: today
 * expiry_date: today
 * purge_date: today + 2 years
-* status: INACTIVE
+* keep status as "active"  - Jamen requested 
 ************************************************/  
 
     $status_date = date("Y-m-d")."Z"; 
@@ -215,18 +277,66 @@ function expire_inactive_user( &$user) {
     update_user_json($user, "expiry_date", $expiry_date);
     update_user_json($user, "purge_date", $purge_date);
 
-    $status = array("value" => "INACTIVE", "desc" => "Inactive"); 
+    $status = array("value" => "ACTIVE", "desc" => "active"); 
     update_user_json($user, "status", $status); 
-
    
     $notes = $user->user_note; 
     $inactive_user_notes =
          array('note_type'=> array("value"=>"OTHER", "desc"=>"Other"), 
-               'note_text' => "Inactive user expired by LTDS on " . date("Y-m-d"),  
+               'note_text' => "Inactive faculty/staff expired by LTDS via VU inactive feed on " . date("Y-m-d"),  
                'user_viewable'=> false, 
+               'segment_type' => "External",
                'popup_note' => false
          ); 
     array_push($notes, $inactive_user_notes); 
+    update_user_json($user, "user_note", $notes);
+
+    return $user;   
+}
+
+function expire_student_user( &$user) {
+/****expire inactive student records **************
+* status_date: today
+* update user group to Alumni
+* set expiry_date: today + 1 year
+* set purge_date: today + 3 years
+* make sure status: active
+************************************************/  
+
+    $status_date = date("Y-m-d")."Z"; 
+    update_user_json($user, "status_date", $status_date); 
+
+    $expiry_date = date('Y-m-d', strtotime('+1 year'));
+    $purge_date = date('Y-m-d', strtotime('+3 years'));
+
+    update_user_json($user, "expiry_date", $expiry_date);
+    update_user_json($user, "purge_date", $purge_date);
+
+    $user_group = array("value" => "ALUMNI", "desc" => "Alumni"); 
+    update_user_json($user, "user_group", $user_group);
+    
+    $status = array("value" => "ACTIVE", "desc" => "Active"); 
+    update_user_json($user, "status", $status); 
+   
+    $notes = $user->user_note; 
+    $inactive_user_notes =
+         array('note_type'=> array("value"=>"OTHER", "desc"=>"Other"), 
+               'note_text' => "Gradudated student changed to alumni by LTDS via VU inactive feed on " . date("Y-m-d"),  
+               'user_viewable'=> false, 
+               'segment_type' => "External",
+               'popup_note' => false
+         ); 
+    array_push($notes, $inactive_user_notes); 
+    update_user_json($user, "user_note", $notes);
+
+    $alumni_user_notes =
+         array('note_type'=> array("value"=>"OTHER", "desc"=>"Other"), 
+               'note_text' => "Gradudated student changed to alumni, please update contact info and remove this note after contact updates --" . date("Y-m-d"),  
+               'user_viewable'=> false, 
+               'segment_type' => "Internal",
+               'popup_note' => true
+         ); 
+    array_push($notes, $alumni_user_notes); 
     update_user_json($user, "user_note", $notes);
 
     return $user;   
