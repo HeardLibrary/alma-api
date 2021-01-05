@@ -175,11 +175,7 @@ foreach ($inactive_users as $u ) {
     if ( !isset( json_decode($r_get, FALSE)->errorsExist) ) { // user retrieved successfully 
        
         $user = json_decode($r_get, FALSE); //return the json string as an object 
-        
-
-
-
-
+ 
         // process user records based on user_group value
         if ($user->user_group) { 
           $ugroup = $user->user_group;
@@ -218,9 +214,6 @@ foreach ($inactive_users as $u ) {
             $cnt_skipped ++;
             $log .= " -- skipped";
             // echo " -- skipped" .$html_eol;
-             
-            fwrite($flog, $log.PHP_EOL);
-            $ebody .= $log.$html_eol; 
         }
         else {     
             // update user record using API PUT 
